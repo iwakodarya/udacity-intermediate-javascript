@@ -83,8 +83,34 @@ function Dinosaur(name, weight, height, diet, fact){
     this.weight = weight;
     this.height = height;
     this.diet = diet;
-    this.fact = fact;
+    this.fact = [fact];
 };
+
+Dinosaur.prototype.compareUserHeight = function (userHeight) {
+    let difference = this.height - userHeight;
+
+    if(userHeight >= this.height)
+        return `At ${userHeight} inches tall, you are ${difference} inches taller than ${this.name}!`;
+    else
+        return `${this.name} is ${difference} inches taller than you are!`;
+};
+
+Dinosaur.prototype.compareUserWeight = function (userWeight) {
+    let difference = this.weight - userWeight;
+
+    if(userWeight >= this.weight)
+        return `At ${userWeight}lbs, you weight ${difference} lbs more than ${this.name}!`;
+    else
+        return `At ${this.weight}, ${this.name} weights ${difference} lbs more than you!`;
+};
+
+Dinosaur.prototype.compareUserDiet = function (userDiet) {
+    if(userDiet !== this.diet)
+        return `Unlike you, ${this.name} is a ${this.diet}!`;
+    else
+        return `Just like you, ${this.name} is also a ${this.diet}!`;
+};
+
 
 // Create Dino Objects
 const dinoFactsArray = [];
@@ -94,8 +120,8 @@ dinoFactsJson.Dinos.forEach(function(value){
     dinoFactsArray.push(dinosaurObject);
 });
 
-// Create Human Object using IIFE
-function createHumanUser(){
+function generateTilesGrid(){
+    // Create Human Object using IIFE
     const humanUser = (
         function(){
             const userName = document.getElementById('name').value;
@@ -110,26 +136,21 @@ function createHumanUser(){
             }
         }
     )();
-    return humanUser;
+
+    // For each dinosaur, add 3 additional fun facts relative to the user.
+    dinoFactsArray.forEach(function(value){
+        value.fact.push(value.compareUserHeight(humanUser.getUserHeight()));
+        value.fact.push(value.compareUserWeight(humanUser.getUserWeight()));
+        value.fact.push(value.compareUserDiet(humanUser.getUserDiet()));
+    });
+
+    // Create 9 tiles 
+
 };
 
+// On button click, prepare and display infographic
 const compareMeButton = document.getElementById('btn');
-
-compareMeButton.addEventListener('click', function(){
-    const humanUser = createHumanUser();
-    console.log(humanUser.getUserName());
-    console.log(humanUser.getUserHeight());
-})
-    // Create Dino Compare Method 1
-    // NOTE: Weight in JSON file is in lbs, height in inches. 
-
-    
-    // Create Dino Compare Method 2
-    // NOTE: Weight in JSON file is in lbs, height in inches.
-
-    
-    // Create Dino Compare Method 3
-    // NOTE: Weight in JSON file is in lbs, height in inches.
+compareMeButton.addEventListener('click', generateTilesGrid);
 
 
     // Generate Tiles for each Dino in Array
@@ -139,4 +160,4 @@ compareMeButton.addEventListener('click', function(){
     // Remove form from screen
 
 
-// On button click, prepare and display infographic
+
