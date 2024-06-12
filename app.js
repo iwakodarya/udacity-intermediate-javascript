@@ -1,6 +1,22 @@
+let dinoFactsJson = require('./dino.json');
 
-    // Create Dino Constructor
+// Create Dino Constructor
+function Dinosaur(name, weight, height, diet, fact){
+    this.name = name;
+    this.weight = weight;
+    this.height = height;
+    this.diet = diet;
+    this.fact = fact;
+};
 
+const dinoFactsArray = [];
+
+dinoFactsJson.Dinos.forEach(function(value){
+    let dinosaurObject = new Dinosaur(value.species, value.weight, value.height, value.diet, value.fact);
+    dinoFactsArray.push(dinosaurObject);
+});
+
+console.log(dinoFactsArray);
 
     // Create Dino Objects
 
