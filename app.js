@@ -83,14 +83,14 @@ function Dinosaur(name, weight, height, diet, fact){
     this.weight = weight;
     this.height = height;
     this.diet = diet;
-    this.fact = [fact];
+    this.facts = [fact];
 };
 
 Dinosaur.prototype.compareUserHeight = function (userHeight) {
     let difference = this.height - userHeight;
 
     if(userHeight >= this.height)
-        return `At ${userHeight} inches tall, you are ${difference} inches taller than ${this.name}!`;
+        return `At ${userHeight} inches tall, you are ${difference*(-1)} inches taller than ${this.name}!`;
     else
         return `${this.name} is ${difference} inches taller than you are!`;
 };
@@ -99,7 +99,7 @@ Dinosaur.prototype.compareUserWeight = function (userWeight) {
     let difference = this.weight - userWeight;
 
     if(userWeight >= this.weight)
-        return `At ${userWeight}lbs, you weight ${difference} lbs more than ${this.name}!`;
+        return `At ${userWeight}lbs, you weight ${difference*(-1)} lbs more than ${this.name}!`;
     else
         return `At ${this.weight}, ${this.name} weights ${difference} lbs more than you!`;
 };
@@ -124,12 +124,12 @@ function generateTilesGrid(){
     // Create Human Object using IIFE
     const humanUser = (
         function(){
-            const userName = document.getElementById('name').value;
+            const name = document.getElementById('name').value;
             const userHeightInches = document.getElementById('feet').value * 12 + document.getElementById('inches').value;
             const userWeightLbs = document.getElementById('weight').value;
             const userDiet = document.getElementById('diet').value;
             return {
-                getUserName: function() {return userName},
+                name,
                 getUserHeight: function() {return userHeightInches},
                 getUserWeight: function() {return userWeightLbs},
                 getUserDiet: function() {return userDiet}
@@ -137,27 +137,64 @@ function generateTilesGrid(){
         }
     )();
 
-    // For each dinosaur, add 3 additional fun facts relative to the user.
+    // For each dinosaur, add 3 additional fun facts relative to the user (excl pigeon..)
     dinoFactsArray.forEach(function(value){
-        value.fact.push(value.compareUserHeight(humanUser.getUserHeight()));
-        value.fact.push(value.compareUserWeight(humanUser.getUserWeight()));
-        value.fact.push(value.compareUserDiet(humanUser.getUserDiet()));
+        if(value.name !== 'Pigeon'){
+            value.facts.push(value.compareUserHeight(humanUser.getUserHeight()));
+            value.facts.push(value.compareUserWeight(humanUser.getUserWeight()));
+            value.facts.push(value.compareUserDiet(humanUser.getUserDiet()));
+        }
     });
 
-    // Create 9 tiles 
+    // Add a human user to the grid in position 5
+    dinoFactsArray.splice(4, 0, humanUser);
 
+    const mainGridNode = document.getElementById('grid');
+
+    // Create 9 infographic tiles 
+    dinoFactsArray.forEach(function(value){
+        // Create path to the respective image
+        function getImagePath(){
+            if (value instanceof Dinosaur){
+                return `./images/${value.name.toLowerCase()}.png`;
+            }
+            else {
+                return './images/human.png';
+            }
+        };
+
+        imgPath = getImagePath();
+
+        let newTile = document.createElement('div');
+
+        // Tile name
+        let tileName = document.createElement('h3');
+        tileName.innerHTML = value.name;
+        newTile.appendChild(tileName);
+
+        // Tile image
+        let tileImage = document.createElement('img');
+        tileImage.setAttribute('src', imgPath);
+        newTile.appendChild(tileImage);
+
+        // Tile fun fact (only for dinosaurs)
+        if (value instanceof Dinosaur){
+            let tileFunFact = document.createElement('p');
+            tileFunFact.innerHTML = value.facts[Math.floor(Math.random() * value.facts.length)];
+            newTile.appendChild(tileFunFact);
+        }
+
+        newTile.classList.add('grid-item');
+
+        mainGridNode.appendChild(newTile);
+    });
 };
 
 // On button click, prepare and display infographic
 const compareMeButton = document.getElementById('btn');
-compareMeButton.addEventListener('click', generateTilesGrid);
-
-
-    // Generate Tiles for each Dino in Array
-  
-        // Add tiles to DOM
-
-    // Remove form from screen
-
+compareMeButton.addEventListener('click', function(){
+    generateTilesGrid();
+    document.getElementById('dino-compare').remove();
+});
 
 
