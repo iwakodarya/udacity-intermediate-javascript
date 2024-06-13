@@ -105,7 +105,7 @@ Dinosaur.prototype.compareUserWeight = function (userWeight) {
 };
 
 Dinosaur.prototype.compareUserDiet = function (userDiet) {
-    if(userDiet !== this.diet)
+    if(userDiet.toLowerCase() !== this.diet)
         return `Unlike you, ${this.name} is a ${this.diet}!`;
     else
         return `Just like you, ${this.name} is also a ${this.diet}!`;
