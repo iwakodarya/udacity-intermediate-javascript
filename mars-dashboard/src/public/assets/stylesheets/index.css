@@ -1,9 +1,21 @@
+@import url('https://fonts.googleapis.com/css2?family=Cutive+Mono&display=swap');
+
+:root {
+  --main-font-family: "Cutive Mono", monospace;
+}
+
+select {
+  font-size: 1.2em;
+  font-weight: bold;
+  font-family: var(--main-font-family);
+}
+
 /* -------------------  MOBILE  --------------------- */
 
 body {
   display: flex;
   flex-direction: column;
-  font-family: Arial;
+  font-family: var(--main-font-family);
   min-height: 100vh;
 }
 

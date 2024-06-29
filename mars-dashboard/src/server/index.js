@@ -27,7 +27,7 @@ app.get('/roverinfo/:roverName', async (req, res) => {
 
         const roverPhotosRaw = await fetch(`https://api.nasa.gov/mars-photos/api/v1/rovers/${req.params.roverName}/photos?earth_date=${roverInfo.max_date}&api_key=${process.env.API_KEY}`)
             .then(res => res.json())
-        console.log(roverPhotosRaw);
+            
         const roverPhotos = roverPhotosRaw.photos.map(photo => {
             return {
                 "img_src": photo.img_src,
