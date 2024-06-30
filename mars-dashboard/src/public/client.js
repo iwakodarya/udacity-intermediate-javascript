@@ -9,7 +9,6 @@ const root = document.getElementById("root");
 
 const updateStore = (store, newState) => {
   store = Object.assign(store, newState);
-  console.log(">>>", store);
   render(root, store);
 };
 
@@ -28,45 +27,46 @@ const render = async (root, state) => {
 
 // create content
 const App = (state) => {
-  let { rovers, apod } = state;
+  let { rovers, selected_rover, selected_rover_info } = state;
 
   const mainAppFragment = document.createDocumentFragment();
 
   // Create <main> with dashboard header name
-  const mainElement = document.createElement("main");
   const headerElement = document.createElement("h1");
   headerElement.innerHTML = "Mars Rovers Dashboard";
-  mainElement.appendChild(headerElement);
+  mainAppFragment.appendChild(headerElement);
 
   // Add dropdown menu below <h1>
-  const selectMenu = createDropdownMenu(rovers, "rover-select");
-  mainElement.appendChild(selectMenu);
+  mainAppFragment.appendChild(createDropdownMenu(rovers, selected_rover));
 
-  // Add <main> to fragment
-  mainAppFragment.appendChild(mainElement);
+  // Add rover information card
+  mainAppFragment.appendChild(
+    roverInformationCard(selected_rover, selected_rover_info)
+  );
+
+  // Add rover photos
+  mainAppFragment.appendChild(
+    displayRoverPhotos(selected_rover, selected_rover_info)
+  );
 
   return mainAppFragment;
 };
 
-// Section for display Rover's info
-
-// Section for display Rover's photos
-
 // ------------------------------------------------------  COMPONENTS
 
 // Function that returns a dropdown menu given an array of menu options and a label
-const createDropdownMenu = (optionsArray, labelName) => {
+const createDropdownMenu = (rovers, selected_rover) => {
   // Creating a fragment to hold all HTML elements needed for dropdown menu
-  const dropdownMenuFragment = document.createDocumentFragment();
+  const dropdownMenuDiv = document.createElement("div");
 
   // Label for dropdown
   const labelElement = document.createElement("label");
-  labelElement.setAttribute("for", labelName);
+  labelElement.setAttribute("for", "rover-select");
   labelElement.innerHTML = "Select a rover >> ";
 
   // Add each rover name value to the dropdown menu
   const selectElement = document.createElement("select");
-  selectElement.id = labelName;
+  selectElement.id = "rover-select";
 
   // Add placeholder option
   const defaultOption = document.createElement("option");
@@ -75,65 +75,102 @@ const createDropdownMenu = (optionsArray, labelName) => {
   if (store.selected_rover === "") defaultOption.setAttribute("selected", "");
   selectElement.appendChild(defaultOption);
 
-  optionsArray.forEach((roverName) => {
+  rovers.forEach((roverName) => {
     const selectOption = document.createElement("option");
     selectOption.setAttribute("value", roverName);
     selectOption.innerHTML = roverName;
     // Check if currently selected, keep it as selected
-    if (store.selected_rover === roverName)
-      selectOption.setAttribute("selected", "");
+    if (selected_rover === roverName) selectOption.setAttribute("selected", "");
 
     selectElement.appendChild(selectOption);
   });
 
-  dropdownMenuFragment.appendChild(labelElement);
-  dropdownMenuFragment.appendChild(selectElement);
+  dropdownMenuDiv.appendChild(labelElement);
+  dropdownMenuDiv.appendChild(selectElement);
 
-  return dropdownMenuFragment;
+  return dropdownMenuDiv;
 };
 
-// Pure function that renders conditional information -- THIS IS JUST AN EXAMPLE, you can delete it.
-const Greeting = (name) => {
-  if (name) {
-    return `
-            <h2>Welcome, ${name}!</h2>
-        `;
-  }
+// Function returns rover's information fragment
+const roverInformationCard = (selected_rover, selected_rover_info) => {
+  const roverInformationDiv = document.createElement("div");
+  roverInformationDiv.id = "rover-information-card";
 
-  return `
-        <h1>Hello!</h1>
-    `;
+  if (selected_rover_info) {
+    // Heading
+    const heading = document.createElement("h2");
+    heading.innerHTML = `Information about ${selected_rover_info.name}`;
+
+    // Create an unordered list and add rover information to it
+    const roverInfoList = document.createElement("ul");
+    // Landing Date
+    const landingDate = document.createElement("li");
+    landingDate.innerHTML = `Landing Date: ${selected_rover_info.landing_date}`;
+    roverInfoList.appendChild(landingDate);
+    // Launch Date
+    const launchDate = document.createElement("li");
+    launchDate.innerHTML = `Launch Date: ${selected_rover_info.launch_date}`;
+    roverInfoList.appendChild(launchDate);
+    // Max Date
+    const maxDate = document.createElement("li");
+    maxDate.innerHTML = `Max Date: ${selected_rover_info.max_date}`;
+    roverInfoList.appendChild(maxDate);
+    // Status
+    const status = document.createElement("li");
+    status.innerHTML = `Status: ${selected_rover_info.status}`;
+    roverInfoList.appendChild(status);
+
+    // Add all elements to the fragment
+    roverInformationDiv.appendChild(heading);
+    roverInformationDiv.appendChild(roverInfoList);
+  } else if (selected_rover) {
+    roverInformationDiv.innerHTML("No information found.");
+  }
+  // Return empty div if no information present
+  return roverInformationDiv;
 };
 
-// Example of a pure function that renders infomation requested from the backend
-const ImageOfTheDay = (apod) => {
-  // If image does not already exist, or it is not from today -- request it again
-  const today = new Date();
-  const photodate = new Date(apod.date);
-  console.log(photodate.getDate(), today.getDate());
+// Function that returns rover's recent photos
+const displayRoverPhotos = (selected_rover, selected_rover_info) => {
+  const roverPhotoGallery = document.createElement("div");
 
-  console.log(photodate.getDate() === today.getDate());
-  if (!apod || apod.date === today.getDate()) {
-    getImageOfTheDay(store);
+  if (selected_rover_info) {
+    const photosHeader = document.createElement("h2");
+    photosHeader.innerHTML = `Showing ${selected_rover_info.photos.length} photos from ${selected_rover} taken on ${selected_rover_info.max_date}`;
+    roverPhotoGallery.appendChild(photosHeader);
+
+    const cameras = [];
+    selected_rover_info.photos.forEach((photo) => {
+      if (!cameras.includes(photo.camera_name)) cameras.push(photo.camera_name);
+    });
+
+    cameras.forEach((camera) => {
+      const cameraPhotos = selected_rover_info.photos.filter(
+        (photo) => photo.camera_name === camera
+      );
+      const cameraPhotosHeader = document.createElement("h3");
+      cameraPhotosHeader.innerHTML = `Camera: ${camera}`;
+      roverPhotoGallery.appendChild(cameraPhotosHeader);
+
+      const roverPhotoGalleryGrid = document.createElement("div");
+      roverPhotoGalleryGrid.id = "rover-photo-gallery";
+      roverPhotoGallery.appendChild(roverPhotoGalleryGrid);
+
+      cameraPhotos.forEach((photo) => {
+        const roverPhoto = document.createElement("img");
+        roverPhoto.setAttribute("src", photo.img_src);
+        roverPhoto.classList.add("rover-photo");
+        roverPhotoGalleryGrid.appendChild(roverPhoto);
+      });
+    });
+  } else if (selected_rover) {
+    roverPhotoGallery.innerHTML = "No photos found.";
   }
 
-  // check if the photo of the day is actually type video!
-  if (apod.media_type === "video") {
-    return `
-            <p>See today's featured video <a href="${apod.url}">here</a></p>
-            <p>${apod.title}</p>
-            <p>${apod.explanation}</p>
-        `;
-  } else {
-    return `
-            <img src="${apod.image.url}" height="350px" width="100%" />
-            <p>${apod.image.explanation}</p>
-        `;
-  }
+  return roverPhotoGallery;
 };
 
 // ------------------------------------------------------  API CALLS
-
 const getRoverInfo = (state, roverName) => {
   const { selected_rover_info } = state;
 
@@ -141,17 +178,6 @@ const getRoverInfo = (state, roverName) => {
     .then((res) => res.json())
     .then((selected_rover_info) => updateStore(store, { selected_rover_info }))
     .then(() => console.log("Here!", store));
-};
-
-// Example API call
-const getImageOfTheDay = (state) => {
-  let { apod } = state;
-
-  fetch(`http://localhost:3000/apod`)
-    .then((res) => res.json())
-    .then((apod) => updateStore(store, { apod }));
-
-  return data;
 };
 
 // ------------------------------------------------------  Main Code

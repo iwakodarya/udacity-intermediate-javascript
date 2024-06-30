@@ -4,13 +4,23 @@
   --main-font-family: "Cutive Mono", monospace;
 }
 
+/* -------------------  MOBILE  --------------------- */
+
 select {
   font-size: 1.2em;
   font-weight: bold;
   font-family: var(--main-font-family);
 }
 
-/* -------------------  MOBILE  --------------------- */
+#rover-photo-gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.rover-photo {
+  width: 23%;
+}
 
 body {
   display: flex;
@@ -19,17 +29,9 @@ body {
   min-height: 100vh;
 }
 
-header {
-  /* header styles */
-}
-
 main {
   flex: 1;
   padding: 20px;
-}
-
-footer {
-  /* footer styles */
 }
 
 /* -------------------  TABLET  --------------------- */
