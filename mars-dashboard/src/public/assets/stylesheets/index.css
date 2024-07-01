@@ -19,7 +19,7 @@ select {
 }
 
 .rover-photo {
-  width: 23%;
+  width: 45%;
 }
 
 body {
@@ -36,17 +36,23 @@ main {
 
 /* -------------------  TABLET  --------------------- */
 @media (min-width: 768px) {
-  /* use mobile */
+  .rover-photo {
+    width: 30%;
+  }
 }
 
 /* -------------------  DESKTOP  -------------------- */
 
 @media (min-width: 1224px) {
-  /* use mobile */
+  .rover-photo {
+    width: 23%;
+  }
 }
 
 /* -------------------  LARGE SCREENS  -------------- */
 
 @media (min-width: 1824px) {
-  /* use mobile */
+  .rover-photo {
+    width: 13%;
+  }
 }
