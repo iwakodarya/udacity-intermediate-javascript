@@ -3,6 +3,7 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const fetch = require('node-fetch')
 const path = require('path')
+const Immutable = require('immutable')
 
 const app = express()
 const port = 3000
@@ -17,28 +18,28 @@ app.get('/roverinfo/:roverName', async (req, res) => {
     try {
         const roverInfoRaw = await fetch(`https://api.nasa.gov/mars-photos/api/v1/manifests/${req.params.roverName}?api_key=${process.env.API_KEY}`)
             .then(res => res.json())
-        const roverInfo = {
+        const roverInfo = Immutable.Map({
             "name": roverInfoRaw.photo_manifest.name,
             "landing_date": roverInfoRaw.photo_manifest.landing_date,
             "launch_date": roverInfoRaw.photo_manifest.launch_date,
             "max_date": roverInfoRaw.photo_manifest.max_date,
             "status": roverInfoRaw.photo_manifest.status
-        };
+        });
 
-        const roverPhotosRaw = await fetch(`https://api.nasa.gov/mars-photos/api/v1/rovers/${req.params.roverName}/photos?earth_date=${roverInfo.max_date}&api_key=${process.env.API_KEY}`)
+        const roverPhotosRaw = await fetch(`https://api.nasa.gov/mars-photos/api/v1/rovers/${req.params.roverName}/photos?earth_date=${roverInfo.get("max_date")}&api_key=${process.env.API_KEY}`)
             .then(res => res.json())
             
         const roverPhotos = roverPhotosRaw.photos.map(photo => {
-            return {
+            return Immutable.Map({
                 "img_src": photo.img_src,
                 "earth_date": photo.earth_date,
                 "camera_name": photo.camera.full_name
-            }
+            })
         });
 
-        roverInfo.photos = roverPhotos;
+        const roverInfoWithPhotos = roverInfo.set("photos", Immutable.List(roverPhotos));
 
-        res.send(roverInfo);
+        res.send(roverInfoWithPhotos);
     } catch (err) {
         console.log('error:', err);
     }

@@ -1,14 +1,16 @@
-let store = {
+const { Map, List } = Immutable;
+
+let store = Immutable.Map({
   selected_rover: "",
   selected_rover_info: "",
-  rovers: ["Curiosity", "Opportunity", "Spirit"],
-};
+  rovers: Immutable.List(["Curiosity", "Opportunity", "Spirit", "Perseverance"])
+});
 
 // add our markup to the page
 const root = document.getElementById("root");
 
-const updateStore = (store, newState) => {
-  store = Object.assign(store, newState);
+const updateStore = (state, newState) => {
+  store = store.merge(newState);
   render(root, store);
 };
 
@@ -20,14 +22,16 @@ const render = async (root, state) => {
   document
     .getElementById("rover-select")
     .addEventListener("change", (event) => {
-      store.selected_rover = event.target.value;
+      store = store.merge({ selected_rover: event.target.value });
       getRoverInfo(store, event.target.value);
     });
 };
 
 // create content
 const App = (state) => {
-  let { rovers, selected_rover, selected_rover_info } = state;
+  const selected_rover = state.get('selected_rover');
+  const rovers = state.get('rovers');
+  const selected_rover_info = state.get('selected_rover_info');
 
   const mainAppFragment = document.createDocumentFragment();
 
@@ -72,7 +76,8 @@ const createDropdownMenu = (rovers, selected_rover) => {
   const defaultOption = document.createElement("option");
   defaultOption.setAttribute("disabled", "");
   defaultOption.innerHTML = "-- Select option --";
-  if (store.selected_rover === "") defaultOption.setAttribute("selected", "");
+  if (selected_rover === "") 
+    defaultOption.setAttribute("selected", "");
   selectElement.appendChild(defaultOption);
 
   rovers.forEach((roverName) => {
@@ -80,8 +85,8 @@ const createDropdownMenu = (rovers, selected_rover) => {
     selectOption.setAttribute("value", roverName);
     selectOption.innerHTML = roverName;
     // Check if currently selected, keep it as selected
-    if (selected_rover === roverName) selectOption.setAttribute("selected", "");
-
+    if (selected_rover === roverName)
+      selectOption.setAttribute("selected", "");
     selectElement.appendChild(selectOption);
   });
 
@@ -99,32 +104,32 @@ const roverInformationCard = (selected_rover, selected_rover_info) => {
   if (selected_rover_info) {
     // Heading
     const heading = document.createElement("h2");
-    heading.innerHTML = `Information about ${selected_rover_info.name}`;
+    heading.innerHTML = `Information about ${selected_rover_info.get("name")}`;
 
     // Create an unordered list and add rover information to it
     const roverInfoList = document.createElement("ul");
     // Landing Date
     const landingDate = document.createElement("li");
-    landingDate.innerHTML = `Landing Date: ${selected_rover_info.landing_date}`;
+    landingDate.innerHTML = `Landing Date: ${selected_rover_info.get("landing_date")}`;
     roverInfoList.appendChild(landingDate);
     // Launch Date
     const launchDate = document.createElement("li");
-    launchDate.innerHTML = `Launch Date: ${selected_rover_info.launch_date}`;
+    launchDate.innerHTML = `Launch Date: ${selected_rover_info.get("launch_date")}`;
     roverInfoList.appendChild(launchDate);
     // Max Date
     const maxDate = document.createElement("li");
-    maxDate.innerHTML = `Max Date: ${selected_rover_info.max_date}`;
+    maxDate.innerHTML = `Max Date: ${selected_rover_info.get("max_date")}`;
     roverInfoList.appendChild(maxDate);
     // Status
     const status = document.createElement("li");
-    status.innerHTML = `Status: ${selected_rover_info.status}`;
+    status.innerHTML = `Status: ${selected_rover_info.get("status")}`;
     roverInfoList.appendChild(status);
 
     // Add all elements to the fragment
     roverInformationDiv.appendChild(heading);
     roverInformationDiv.appendChild(roverInfoList);
   } else if (selected_rover) {
-    roverInformationDiv.innerHTML("No information found.");
+    roverInformationDiv.innerHTML = "No information found.";
   }
   // Return empty div if no information present
   return roverInformationDiv;
@@ -136,17 +141,18 @@ const displayRoverPhotos = (selected_rover, selected_rover_info) => {
 
   if (selected_rover_info) {
     const photosHeader = document.createElement("h2");
-    photosHeader.innerHTML = `Showing ${selected_rover_info.photos.length} photos from ${selected_rover} taken on ${selected_rover_info.max_date}`;
+    photosHeader.innerHTML = `Showing ${selected_rover_info.get("photos").size} photos from ${selected_rover} taken on ${selected_rover_info.get("max_date")}`;
     roverPhotoGallery.appendChild(photosHeader);
 
     const cameras = [];
-    selected_rover_info.photos.forEach((photo) => {
-      if (!cameras.includes(photo.camera_name)) cameras.push(photo.camera_name);
+    selected_rover_info.get("photos").forEach((photo) => {
+      if (!cameras.includes(photo.get("camera_name"))) 
+        cameras.push(photo.get("camera_name"));
     });
 
     cameras.forEach((camera) => {
-      const cameraPhotos = selected_rover_info.photos.filter(
-        (photo) => photo.camera_name === camera
+      const cameraPhotos = selected_rover_info.get("photos").filter(
+        (photo) => photo.get("camera_name") === camera
       );
       const cameraPhotosHeader = document.createElement("h3");
       cameraPhotosHeader.innerHTML = `Camera: ${camera}`;
@@ -158,7 +164,7 @@ const displayRoverPhotos = (selected_rover, selected_rover_info) => {
 
       cameraPhotos.forEach((photo) => {
         const roverPhoto = document.createElement("img");
-        roverPhoto.setAttribute("src", photo.img_src);
+        roverPhoto.setAttribute("src", photo.get("img_src"));
         roverPhoto.classList.add("rover-photo");
         roverPhotoGalleryGrid.appendChild(roverPhoto);
       });
@@ -172,12 +178,10 @@ const displayRoverPhotos = (selected_rover, selected_rover_info) => {
 
 // ------------------------------------------------------  API CALLS
 const getRoverInfo = (state, roverName) => {
-  const { selected_rover_info } = state;
-
   fetch(`http://localhost:3000/roverinfo/${roverName}`)
     .then((res) => res.json())
-    .then((selected_rover_info) => updateStore(store, { selected_rover_info }))
-    .then(() => console.log("Here!", store));
+    .then((selected_rover_info) => updateStore(state, { selected_rover_info }))
+    .then(() => console.log("Here!", store.toJS()));
 };
 
 // ------------------------------------------------------  Main Code
