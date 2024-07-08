@@ -22,11 +22,13 @@ const render = async (root, state) => {
   document
     .getElementById("rover-select")
     .addEventListener("change", (event) => {
+      // Updated selected rover in dropdown menu
       state = state.merge({ selected_rover: event.target.value });
       // Add loading screen which will be replaced by re-render on API call completion
       const content = document.getElementById('content');
       content.innerHTML = "";
       content.appendChild(loadingScreen());
+      // Fetch rover's info
       getRoverInfo(state, event.target.value);
     });
 };
@@ -47,19 +49,21 @@ const App = (state) => {
   // Add dropdown menu below <h1>
   mainAppFragment.appendChild(createDropdownMenu(rovers, selected_rover));
 
+  // Add content div to hold all the content
   const contentElement = document.createElement('div');
   contentElement.id = 'content';
 
-  // Add rover information card
+  // Add rover information card to content
   contentElement.appendChild(
     roverInformationCard(selected_rover, selected_rover_info)
   );
 
-  // Add rover photos
+  // Add rover photos to content
   contentElement.appendChild(
     displayRoverPhotos(selected_rover, selected_rover_info)
   );
 
+  // Add content to main fragment
   mainAppFragment.append(contentElement);
 
   return mainAppFragment;
