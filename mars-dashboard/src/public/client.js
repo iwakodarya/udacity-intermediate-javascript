@@ -15,7 +15,6 @@ const updateStore = (state, newState) => {
 };
 
 const render = async (root, state) => {
-  console.log("render is called")
   root.innerHTML = ""; // Remove content, eg initial "Loading..."
   root.appendChild(App(state));
 
@@ -24,7 +23,10 @@ const render = async (root, state) => {
     .getElementById("rover-select")
     .addEventListener("change", (event) => {
       state = state.merge({ selected_rover: event.target.value });
-      // loading screen ? 
+      // Add loading screen which will be replaced by re-render on API call completion
+      const content = document.getElementById('content');
+      content.innerHTML = "";
+      content.appendChild(loadingScreen());
       getRoverInfo(state, event.target.value);
     });
 };
@@ -45,15 +47,20 @@ const App = (state) => {
   // Add dropdown menu below <h1>
   mainAppFragment.appendChild(createDropdownMenu(rovers, selected_rover));
 
+  const contentElement = document.createElement('div');
+  contentElement.id = 'content';
+
   // Add rover information card
-  mainAppFragment.appendChild(
+  contentElement.appendChild(
     roverInformationCard(selected_rover, selected_rover_info)
   );
 
   // Add rover photos
-  mainAppFragment.appendChild(
+  contentElement.appendChild(
     displayRoverPhotos(selected_rover, selected_rover_info)
   );
+
+  mainAppFragment.append(contentElement);
 
   return mainAppFragment;
 };
@@ -96,6 +103,14 @@ const createDropdownMenu = (rovers, selected_rover) => {
   dropdownMenuDiv.appendChild(selectElement);
 
   return dropdownMenuDiv;
+};
+
+// Function that returns a loading screen fragment
+const loadingScreen = () => {
+  const loadingScreen = document.createElement('h2');
+  loadingScreen.innerHTML = 'Loading ...';
+  loadingScreen.id = 'loading-screen';
+  return loadingScreen;
 };
 
 // Function returns rover's information fragment
