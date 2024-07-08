@@ -10,11 +10,12 @@ let store = Immutable.Map({
 const root = document.getElementById("root");
 
 const updateStore = (state, newState) => {
-  store = store.merge(newState);
-  render(root, store);
+  state = state.merge(newState);
+  render(root, state);
 };
 
 const render = async (root, state) => {
+  console.log("render is called")
   root.innerHTML = ""; // Remove content, eg initial "Loading..."
   root.appendChild(App(state));
 
@@ -22,8 +23,9 @@ const render = async (root, state) => {
   document
     .getElementById("rover-select")
     .addEventListener("change", (event) => {
-      store = store.merge({ selected_rover: event.target.value });
-      getRoverInfo(store, event.target.value);
+      state = state.merge({ selected_rover: event.target.value });
+      // loading screen ? 
+      getRoverInfo(state, event.target.value);
     });
 };
 
@@ -180,8 +182,7 @@ const displayRoverPhotos = (selected_rover, selected_rover_info) => {
 const getRoverInfo = (state, roverName) => {
   fetch(`http://localhost:3000/roverinfo/${roverName}`)
     .then((res) => res.json())
-    .then((selected_rover_info) => updateStore(state, { selected_rover_info }))
-    .then(() => console.log("Here!", store.toJS()));
+    .then((selected_rover_info) => updateStore(state, { selected_rover_info }));
 };
 
 // ------------------------------------------------------  Main Code
